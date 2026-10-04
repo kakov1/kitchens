@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /build/restaurant ./cmd/restaurant-service \
+RUN CGO_ENABLED=0 GOOS=linux go build -o /build/restaurant ./cmd/simulator \
     && go clean -cache -modcache
 
 FROM alpine:latest
