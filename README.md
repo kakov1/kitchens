@@ -25,6 +25,8 @@ Distributed order management and kitchen simulation service for restaurants. The
 
 The database schema is normalized: order statuses are extracted into a separate table, and prices are fixed in integer kopecks.
 
+![db](docs/db.png)
+
 ### Database Implementation Details
 
 * **Status Lookup Table (`order_statuses`)**: `1: Created`, `2: Accepted`, `3: Cooking`, `4: Ready`, `5: Cancelled`.
