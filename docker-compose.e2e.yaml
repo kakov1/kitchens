@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db_e2e:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: e2e_user
+      POSTGRES_PASSWORD: e2e_password
+      POSTGRES_DB: avito_kitchen_e2e
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U e2e_user -d avito_kitchen_e2e"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate_e2e:
+    image: migrate/migrate
+    depends_on:
+      db_e2e:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations
+    command: ["-path", "/migrations", "-database", "postgres://e2e_user:e2e_password@db_e2e:5432/avito_kitchen_e2e?sslmode=disable", "up"]
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test 
+    environment:
+      - DB_CONN=postgres://e2e_user:e2e_password@db_e2e:5432/avito_kitchen_e2e?sslmode=disable
+    depends_on:
+      db_e2e:
+        condition: service_healthy
+      migrate_e2e:
+        condition: service_completed_successfully
