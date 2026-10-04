@@ -1,0 +1,47 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - misspell
+
+linters-settings:
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment
+  misspell:
+    locale: US
+  errcheck:
+    exclude-functions:
+      - (*net/http.Response).Body.Close
+      - io.Closer.Close
+      - (*google.golang.org/grpc.ClientConn).Close
+      - (*github.com/segmentio/kafka-go.Reader).CommitMessages
+      - (*github.com/segmentio/kafka-go.Reader).Close
+      - (*github.com/segmentio/kafka-go.Writer).Close
+      - (*github.com/redis/go-redis/v9.Client).Close
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    gofmt:
+      simplify: true
+    goimports:
+      local-prefixes: kitchens
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-dirs:
+    - pkg/api

@@ -1,0 +1,55 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint:
+    name: Run golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: false
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.64.5
+          args: --timeout=5m
+
+  test:
+    name: Run Integration & Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Tests in Docker Compose
+        run: |
+          docker compose -p e2e -f docker-compose.e2e.yaml run --rm tests sh -c "
+            go test -coverpkg=./internal/... -coverprofile=/tmp/cover.out ./internal/... &&
+            go tool cover -func=/tmp/cover.out
+          "
+
+      - name: Cleanup Test Containers
+        if: always()
+        run: docker compose -p e2e -f docker-compose.e2e.yaml down -v
+
+  docker-build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Services
+        run: docker compose build
